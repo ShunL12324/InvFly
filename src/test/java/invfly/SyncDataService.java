@@ -1,0 +1,88 @@
+package invfly;
+
+import com.google.gson.Gson;
+import invfly.data.GsonTypes;
+import invfly.data.StorageData;
+import invfly.data.SyncData;
+import invfly.event.LoadDataEvent;
+import invfly.event.SaveDataEvent;
+import invfly.managers.DatabaseManager;
+import invfly.utils.Utils;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.text.Text;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class SyncDataService {
+
+    private final Gson gson = new Gson();
+    private final DatabaseManager databaseManager;
+    private final List<Class<? extends SyncData>> classList = new ArrayList<>();
+
+
+    public SyncDataService(){
+        databaseManager = Invfly.instance.getDatabaseManager();
+    }
+
+    public void loadUerData(User user) throws InstantiationException, IllegalAccessException {
+
+        StorageData storageData = databaseManager.getLatest(user);
+        if (storageData != null) {
+            new LoadDataEvent.Pre(user, storageData);
+            this.loadUserData(user, storageData);
+        }
+        new LoadDataEvent.Done(user, storageData);
+
+    }
+
+    public void saveUserData(User user, boolean isDisconnect) throws IllegalAccessException, InstantiationException {
+        Map<String, String> all = new HashMap<>();
+        for (Class<? extends SyncData> dataClass : classList) {
+            SyncData instance = dataClass.newInstance();
+            String strData = instance.getSerializedData(user);
+            all.put(instance.getID(), strData);
+        }
+        StorageData storageData = new StorageData(user, gson.toJson(all, GsonTypes.ALLDATATYPE), isDisconnect);
+        databaseManager.saveData(storageData);
+        new SaveDataEvent(user, storageData);
+    }
+
+    public void loadUserData(User user, StorageData data) throws IllegalAccessException, InstantiationException {
+        new LoadDataEvent.Pre(user, data);
+        Map<String, String> all = gson.fromJson(data.getData(), GsonTypes.ALLDATATYPE);
+        for (Class<? extends SyncData> dataClass : classList) {
+            SyncData instance = dataClass.newInstance();
+            if (all.containsKey(instance.getID())) {
+                String strData = all.get(instance.getID());
+                instance.deserialize(user, strData);
+                new LoadDataEvent.Done(user, data);
+            } else {
+                Text text = Utils.toText(Invfly.instance.getConfigLoader().getMessage().noValue).replace("%data%", Utils.toText(instance.getID()));
+                Sponge.getServer().getConsole().sendMessage(text);
+            }
+        }
+        new LoadDataEvent.Done(user, data);
+    }
+
+    public void register(Class<? extends SyncData> dataClass){
+        if (!this.classList.contains(dataClass)){
+            this.classList.add(dataClass);
+        }
+    }
+
+    public void unregister(Class<? extends SyncData> dataClass){
+        this.classList.remove(dataClass);
+    }
+
+    public void unregisterAll(){
+        this.classList.clear();
+    }
+
+
+
+
+}
