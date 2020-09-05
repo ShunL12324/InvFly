@@ -1,6 +1,5 @@
 package com.github.ericliucn.invfly.config;
 
-import com.github.ericliucn.invfly.utils.Utils;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 

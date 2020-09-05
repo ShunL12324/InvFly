@@ -20,13 +20,15 @@ public class SaveCommand implements CommandExecutor {
         Message message = Invfly.instance.getConfigLoader().getMessage();
         args.<User>getOne("user").ifPresent(user -> {
             SyncDataService syncDataService = Invfly.instance.getService();
-            try {
-                syncDataService.saveUserData(user, false);
-                src.sendMessage(Utils.toText(message.saveSuccessful));
-            } catch (IllegalAccessException | InstantiationException e) {
-                e.printStackTrace();
-                src.sendMessage(Utils.toText(message.saveFail));
-            }
+            Invfly.instance.getAsyncExecutor().submit(()->{
+                try {
+                    syncDataService.saveUserData(user, false);
+                    src.sendMessage(Utils.toText(message.saveSuccessful));
+                } catch (IllegalAccessException | InstantiationException e) {
+                    e.printStackTrace();
+                    src.sendMessage(Utils.toText(message.saveFail));
+                }
+            });
         });
         return CommandResult.success();
     }

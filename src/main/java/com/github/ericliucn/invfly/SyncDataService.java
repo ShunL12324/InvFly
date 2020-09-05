@@ -43,8 +43,12 @@ public class SyncDataService {
         Map<String, String> all = new HashMap<>();
         for (Class<? extends SyncData> dataClass : classList) {
             SyncData instance = dataClass.newInstance();
-            String strData = instance.getSerializedData(user);
-            all.put(instance.getID(), strData);
+            try {
+                String strData = instance.getSerializedData(user);
+                all.put(instance.getID(), strData);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
         StorageData storageData = new StorageData(user, gson.toJson(all, GsonTypes.ALLDATATYPE), isDisconnect);
         databaseManager.saveData(storageData);

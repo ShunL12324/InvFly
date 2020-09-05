@@ -14,13 +14,15 @@ public class ReloadCommand implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) {
         Message message = Invfly.instance.getConfigLoader().getMessage();
-        try {
-            Invfly.instance.reload();
-            src.sendMessage(Utils.toText(message.reloadSuccess));
-        }catch (Exception e){
-            e.printStackTrace();
-            src.sendMessage(Utils.toText(message.reloadFail));
-        }
+        Invfly.instance.getAsyncExecutor().submit(()->{
+            try {
+                Invfly.instance.reload();
+                src.sendMessage(Utils.toText(message.reloadSuccess));
+            }catch (Exception e){
+                e.printStackTrace();
+                src.sendMessage(Utils.toText(message.reloadFail));
+            }
+        });
         return CommandResult.success();
     }
 

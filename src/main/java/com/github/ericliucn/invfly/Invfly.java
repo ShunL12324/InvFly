@@ -17,6 +17,7 @@ import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
+import org.spongepowered.api.service.user.UserStorageService;
 
 import java.io.File;
 
@@ -42,12 +43,14 @@ public class Invfly {
     private EventHandler eventHandler;
     private SpongeExecutorService asyncExecutor;
     private SpongeExecutorService syncExecutor;
+    private UserStorageService userStorageService;
 
     @Listener
     public void onPostInit(GamePostInitializationEvent event){
         instance = this;
         asyncExecutor = Sponge.getScheduler().createAsyncExecutor(this);
         syncExecutor = Sponge.getScheduler().createSyncExecutor(this);
+        userStorageService = Sponge.getServiceManager().provideUnchecked(UserStorageService.class);
         configLoader = new ConfigLoader(file);
         databaseManager = new DatabaseManager();
         Sponge.getServiceManager().setProvider(this, SyncDataService.class, new SyncDataService());
@@ -68,8 +71,16 @@ public class Invfly {
 
 
     public void reload(){
-        eventHandler.unregister();
-        service.unregisterAll();
+        if (eventHandler != null) {
+            eventHandler.unregister();
+        }else {
+            eventHandler = new EventHandler();
+        }
+        if (service != null) {
+            service.unregisterAll();
+        }else {
+            service = Sponge.getServiceManager().provideUnchecked(SyncDataService.class);
+        }
         configLoader = new ConfigLoader(file);
         databaseManager = new DatabaseManager();
         registerModule();
@@ -133,5 +144,9 @@ public class Invfly {
 
     public SpongeExecutorService getSyncExecutor() {
         return syncExecutor;
+    }
+
+    public UserStorageService getUserStorageService() {
+        return userStorageService;
     }
 }

@@ -14,11 +14,15 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.SaveWorldEvent;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class EventHandler {
@@ -36,6 +40,7 @@ public class EventHandler {
     private Duration outDate;
     private Message message;
     private boolean saveWhenWorldSave;
+    private UserStorageService userStorageService;
 
     public EventHandler(){
         this.register();
@@ -43,6 +48,7 @@ public class EventHandler {
 
     public void register(){
         Sponge.getEventManager().registerListeners(Invfly.instance, this);
+        userStorageService = Invfly.instance.getUserStorageService();
         service = Invfly.instance.getService();
         databaseManager = Invfly.instance.getDatabaseManager();
         asyncExecutor = Invfly.instance.getAsyncExecutor();
@@ -66,13 +72,14 @@ public class EventHandler {
         World world = event.getTargetWorld();
         for (Player player:world.getPlayers()){
             if (!BLACKLIST.contains(player.getUniqueId())) {
-                try {
-                    service.saveUserData(player, false);
-                } catch (IllegalAccessException | InstantiationException e) {
-                    e.printStackTrace();
-                    Sponge.getServer()
-                            .getConsole()
-                            .sendMessage(Utils.toText(message.failedSaveDataWhenWorldSave).replace("%player%", Utils.toText(player.getName())));
+                if (player.hasPermission("invfly.sync.save")) {
+                    asyncExecutor.submit(()->{
+                        try {
+                            service.saveUserData(player, false);
+                        } catch (IllegalAccessException | InstantiationException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
             }
         }
@@ -98,11 +105,17 @@ public class EventHandler {
     @Listener
     public void onJoin(ClientConnectionEvent.Join event, @First Player player){
         UUID uuid = player.getUniqueId();
-        asyncExecutor.scheduleAtFixedRate(new JoinProcess(uuid, player), delay, nextRetry * 1000, TimeUnit.MILLISECONDS);
+        if (player.hasPermission("invfly.sync.load")) {
+            asyncExecutor.scheduleAtFixedRate(new JoinProcess(uuid, player), delay, nextRetry * 1000, TimeUnit.MILLISECONDS);
+        }else {
+            BLACKLIST.remove(uuid);
+            FROZEN.remove(uuid);
+        }
     }
 
     @Listener
     public void disconnect(ClientConnectionEvent.Disconnect event, @First Player player){
+        if (!player.hasPermission("invfly.sync.save")) return;
         UUID uuid = player.getUniqueId();
         if (!BLACKLIST.contains(uuid)){
             asyncExecutor.submit(()->{

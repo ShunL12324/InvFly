@@ -22,13 +22,15 @@ public class LoadCommand implements CommandExecutor {
         Message message = Invfly.instance.getConfigLoader().getMessage();
         args.<User>getOne("user").ifPresent(user -> {
             SyncDataService syncDataService = Invfly.instance.getService();
-            try {
-                syncDataService.loadUerData(user);
-                src.sendMessage(Utils.toText(message.loadSuccessful));
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-                src.sendMessage(Utils.toText(message.loadFail));
-            }
+            Invfly.instance.getAsyncExecutor().submit(()->{
+                try {
+                    syncDataService.loadUerData(user);
+                    src.sendMessage(Utils.toText(message.loadSuccessful));
+                } catch (InstantiationException | IllegalAccessException e) {
+                    e.printStackTrace();
+                    src.sendMessage(Utils.toText(message.loadFail));
+                }
+            });
         });
         return CommandResult.success();
     }
