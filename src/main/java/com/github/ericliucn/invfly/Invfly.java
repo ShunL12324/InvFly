@@ -48,19 +48,19 @@ public class Invfly {
     @Listener
     public void onPostInit(GamePostInitializationEvent event){
         instance = this;
-        asyncExecutor = Sponge.getScheduler().createAsyncExecutor(this);
-        syncExecutor = Sponge.getScheduler().createSyncExecutor(this);
-        userStorageService = Sponge.getServiceManager().provideUnchecked(UserStorageService.class);
         configLoader = new ConfigLoader(file);
-        databaseManager = new DatabaseManager();
         Sponge.getServiceManager().setProvider(this, SyncDataService.class, new SyncDataService());
-        service = Sponge.getServiceManager().provideUnchecked(SyncDataService.class);
-        registerModule();
-        eventHandler = new EventHandler();
     }
 
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
+        databaseManager = new DatabaseManager();
+        asyncExecutor = Sponge.getScheduler().createAsyncExecutor(this);
+        syncExecutor = Sponge.getScheduler().createSyncExecutor(this);
+        userStorageService = Sponge.getServiceManager().provideUnchecked(UserStorageService.class);
+        service = Sponge.getServiceManager().provideUnchecked(SyncDataService.class);
+        registerModule();
+        eventHandler = new EventHandler();
         commandManager = new CommandManager();
     }
 

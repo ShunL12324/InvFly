@@ -19,18 +19,17 @@ import java.util.Map;
 
 public class SyncDataService {
 
-    private final Gson gson = new Gson();
-    private final DatabaseManager databaseManager;
+    private static final Gson gson = new Gson();
     private final List<Class<? extends SyncData>> classList = new ArrayList<>();
 
 
     public SyncDataService(){
-        databaseManager = Invfly.instance.getDatabaseManager();
+
     }
 
     public void loadUerData(User user) throws InstantiationException, IllegalAccessException {
 
-        StorageData storageData = databaseManager.getLatest(user);
+        StorageData storageData = getDatabaseManager().getLatest(user);
         if (storageData != null) {
             new LoadDataEvent.Pre(user, storageData);
             this.loadUserData(user, storageData);
@@ -51,7 +50,7 @@ public class SyncDataService {
             }
         }
         StorageData storageData = new StorageData(user, gson.toJson(all, GsonTypes.ALLDATATYPE), isDisconnect);
-        databaseManager.saveData(storageData);
+        getDatabaseManager().saveData(storageData);
         new SaveDataEvent(user, storageData);
     }
 
@@ -84,6 +83,10 @@ public class SyncDataService {
 
     public void unregisterAll(){
         this.classList.clear();
+    }
+
+    private DatabaseManager getDatabaseManager(){
+        return Invfly.instance.getDatabaseManager();
     }
 
 
