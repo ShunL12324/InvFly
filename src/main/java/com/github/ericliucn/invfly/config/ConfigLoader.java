@@ -27,6 +27,7 @@ public class ConfigLoader {
         configFile = new File(file, "invfly.conf");
         messageFile = new File(file, "message.conf");
         this.registerCustomSerializer();
+        this.createDic(file);
         this.loadConfig();
         this.loadMessage();
     }
@@ -35,6 +36,12 @@ public class ConfigLoader {
         collection = TypeSerializers.getDefaultSerializers().newChild();
         collection.registerType(TypeToken.of(Duration.class), new DurationSerializer());
         collection.registerType(TypeToken.of(Text.class), new TextsSerializer());
+    }
+
+    private void createDic(File file){
+        if (!file.exists()){
+            file.mkdir();
+        }
     }
 
 
