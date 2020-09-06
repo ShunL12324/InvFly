@@ -3,6 +3,7 @@ package com.github.ericliucn.invfly.data.datas;
 import com.github.ericliucn.invfly.data.SyncData;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 public class FoodSyncData implements SyncData {
 
@@ -22,4 +23,10 @@ public class FoodSyncData implements SyncData {
     public String getID() {
         return "feedData";
     }
+
+    @Override
+    public boolean shouldAsync() {
+        return true;
+    }
+
 }

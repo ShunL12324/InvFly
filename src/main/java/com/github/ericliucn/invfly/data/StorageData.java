@@ -4,6 +4,7 @@ import com.github.ericliucn.invfly.Invfly;
 import org.spongepowered.api.entity.living.player.User;
 
 import java.sql.Timestamp;
+import java.util.Map;
 
 public class StorageData {
 
@@ -13,7 +14,8 @@ public class StorageData {
     private final boolean disconnect;
     private final Timestamp time;
     private int id = -1;
-    private String serverName = Invfly.instance.getConfigLoader().getConfig().general.serverName;
+    private final String serverName;
+    private Map<String, String> dataMap;
 
     public StorageData(User user, String data, Timestamp timestamp, boolean disconnect){
         this.data = data;
@@ -21,6 +23,8 @@ public class StorageData {
         this.uuid = user.getUniqueId().toString();
         this.disconnect = disconnect;
         this.time = timestamp;
+        this.serverName = Invfly.instance.getConfigLoader().getConfig().general.serverName;
+        this.dataMap = Invfly.instance.getGSON().fromJson(data, GsonTypes.ALLDATATYPE);
     }
 
     public StorageData(User user, String data, Timestamp timestamp){
@@ -43,6 +47,7 @@ public class StorageData {
         this.data = data;
         this.id = id;
         this.serverName = serverName;
+        this.dataMap = Invfly.instance.getGSON().fromJson(data, GsonTypes.ALLDATATYPE);
     }
 
     public String getName() {
@@ -74,5 +79,12 @@ public class StorageData {
             return "UNKNOWN";
         }
         return this.serverName;
+    }
+
+    public String getSingleData(SyncData data){
+        if (this.dataMap.containsKey(data.getID())){
+            return this.dataMap.get(data.getID());
+        }
+        return null;
     }
 }

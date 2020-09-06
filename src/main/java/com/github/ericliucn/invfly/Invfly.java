@@ -6,6 +6,8 @@ import com.github.ericliucn.invfly.data.datas.*;
 import com.github.ericliucn.invfly.managers.CommandManager;
 import com.github.ericliucn.invfly.managers.DatabaseManager;
 import com.github.ericliucn.invfly.managers.EventHandler;
+import com.github.ericliucn.invfly.service.SyncDataService;
+import com.google.gson.Gson;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -44,6 +46,7 @@ public class Invfly {
     private SpongeExecutorService asyncExecutor;
     private SpongeExecutorService syncExecutor;
     private UserStorageService userStorageService;
+    private Gson GSON;
 
     @Listener
     public void onPostInit(GamePostInitializationEvent event){
@@ -55,6 +58,7 @@ public class Invfly {
 
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
+        GSON = new Gson();
         asyncExecutor = Sponge.getScheduler().createAsyncExecutor(this);
         syncExecutor = Sponge.getScheduler().createSyncExecutor(this);
         userStorageService = Sponge.getServiceManager().provideUnchecked(UserStorageService.class);
@@ -90,31 +94,31 @@ public class Invfly {
     private void registerModule(){
         InvFlyConfig.Module module = configLoader.getConfig().module;
         if (module.enderChestInventory){
-            service.register(EnderChestSyncData.class);
+            service.register(new EnderChestSyncData());
         }
         if (module.playerMainInventory){
-            service.register(PlayerInvSyncData.class);
+            service.register(new PlayerInvSyncData());
         }
         if (module.experience){
-            service.register(ExpSyncData.class);
+            service.register(new ExpSyncData());
         }
         if (module.gameMode){
-            service.register(GameModeSyncData.class);
+            service.register(new GameModeSyncData());
         }
         if (module.health){
-            service.register(HealthSyncData.class);
+            service.register(new HealthSyncData());
         }
         if (module.hotbarIndex){
-            service.register(HotbarSyncData.class);
+            service.register(new HotbarSyncData());
         }
         if (module.potion){
-            service.register(PotionSyncData.class);
+            service.register(new PotionSyncData());
         }
         if (module.food){
-            service.register(FoodSyncData.class);
+            service.register(new FoodSyncData());
         }
         if (module.flyData){
-            service.register(FlySyncData.class);
+            service.register(new FlySyncData());
         }
     }
 
@@ -148,5 +152,9 @@ public class Invfly {
 
     public UserStorageService getUserStorageService() {
         return userStorageService;
+    }
+
+    public Gson getGSON() {
+        return GSON;
     }
 }

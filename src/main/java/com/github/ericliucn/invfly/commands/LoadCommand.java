@@ -2,7 +2,7 @@ package com.github.ericliucn.invfly.commands;
 
 
 import com.github.ericliucn.invfly.Invfly;
-import com.github.ericliucn.invfly.SyncDataService;
+import com.github.ericliucn.invfly.service.SyncDataService;
 import com.github.ericliucn.invfly.config.Message;
 import com.github.ericliucn.invfly.utils.Utils;
 import org.spongepowered.api.command.CommandResult;
@@ -22,15 +22,8 @@ public class LoadCommand implements CommandExecutor {
         Message message = Invfly.instance.getConfigLoader().getMessage();
         args.<User>getOne("user").ifPresent(user -> {
             SyncDataService syncDataService = Invfly.instance.getService();
-            Invfly.instance.getAsyncExecutor().submit(()->{
-                try {
-                    syncDataService.loadUerData(user);
-                    src.sendMessage(Utils.toText(message.loadSuccessful));
-                } catch (InstantiationException | IllegalAccessException e) {
-                    e.printStackTrace();
-                    src.sendMessage(Utils.toText(message.loadFail));
-                }
-            });
+            syncDataService.loadUerData(user, false);
+            src.sendMessage(Utils.toText(message.loadSuccessful));
         });
         return CommandResult.success();
     }

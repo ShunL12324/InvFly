@@ -1,6 +1,5 @@
 package com.github.ericliucn.invfly.data.datas;
 
-import com.github.ericliucn.invfly.Invfly;
 import com.github.ericliucn.invfly.data.GsonTypes;
 import com.github.ericliucn.invfly.data.SyncData;
 import com.google.gson.Gson;
@@ -29,10 +28,7 @@ public class HealthSyncData implements SyncData {
         Map<String, Double> doubleMap = gson.fromJson(data, GsonTypes.HEAL);
         double heal = doubleMap.get("heal");
         double max = doubleMap.get("max");
-        Invfly.instance.getSyncExecutor().submit(()->{
-            // health data must be access from main thread
-            user.offer(Keys.HEALTH, heal);
-        });
+        user.offer(Keys.HEALTH, heal);
         user.offer(Keys.MAX_HEALTH, max);
     }
 
@@ -40,4 +36,11 @@ public class HealthSyncData implements SyncData {
     public String getID() {
         return "health";
     }
+
+    //Heal data must in main thread
+    @Override
+    public boolean shouldAsync() {
+        return false;
+    }
+
 }
