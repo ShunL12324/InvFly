@@ -48,9 +48,9 @@ public class Invfly {
     @Listener
     public void onPostInit(GamePostInitializationEvent event){
         instance = this;
+        Sponge.getServiceManager().setProvider(this, SyncDataService.class, new SyncDataService());
         configLoader = new ConfigLoader(file);
         databaseManager = new DatabaseManager();
-        Sponge.getServiceManager().setProvider(this, SyncDataService.class, new SyncDataService());
     }
 
     @Listener

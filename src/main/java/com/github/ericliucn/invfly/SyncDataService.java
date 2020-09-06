@@ -77,6 +77,10 @@ public class SyncDataService {
         }
     }
 
+    public StorageData getLatestData(User user){
+        return getDatabaseManager().getLatest(user);
+    }
+
     public void unregister(Class<? extends SyncData> dataClass){
         this.classList.remove(dataClass);
     }
