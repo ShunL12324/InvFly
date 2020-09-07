@@ -4,7 +4,9 @@ import com.github.ericliucn.invfly.data.StorageData;
 import com.github.ericliucn.invfly.data.SyncData;
 import org.spongepowered.api.event.user.TargetUserEvent;
 
-public interface SyncDataEvent extends TargetUserEvent {
+import java.util.UUID;
+
+public interface SyncSingleEvent extends TargetUserEvent {
 
     StorageData getStorageData();
 
@@ -13,4 +15,6 @@ public interface SyncDataEvent extends TargetUserEvent {
     default String getID(){
         return getSyncData().getID();
     }
+
+    UUID getParentTaskUUID();
 }

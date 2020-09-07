@@ -87,4 +87,8 @@ public class StorageData {
         }
         return null;
     }
+
+    public Map<String, String> getDataMap() {
+        return dataMap;
+    }
 }

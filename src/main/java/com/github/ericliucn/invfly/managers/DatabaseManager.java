@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class DatabaseManager {
 
@@ -193,6 +194,22 @@ public class DatabaseManager {
             e.printStackTrace();
         }
 
+    }
+
+    public boolean isDataExists(UUID uuid){
+        String sql = String.format("select exists(select * from %s where uuid = '%s')", table, uuid.toString());
+        try (
+                Connection connection = getDataSource().getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql);
+                ResultSet resultSet = statement.executeQuery()
+                ){
+            while (resultSet.next()){
+                return resultSet.first();
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return false;
     }
 
 }

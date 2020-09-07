@@ -1,10 +1,10 @@
 package com.github.ericliucn.invfly.commands;
 
 import com.github.ericliucn.invfly.Invfly;
-import com.github.ericliucn.invfly.service.SyncDataService;
 import com.github.ericliucn.invfly.config.Message;
 import com.github.ericliucn.invfly.data.StorageData;
 import com.github.ericliucn.invfly.managers.DatabaseManager;
+import com.github.ericliucn.invfly.service.SyncDataService;
 import com.github.ericliucn.invfly.utils.Utils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;

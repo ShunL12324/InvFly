@@ -5,7 +5,6 @@ import com.github.ericliucn.invfly.exception.DeserializeException;
 import com.github.ericliucn.invfly.exception.SerializeException;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 public class FlySyncData implements SyncData {
 

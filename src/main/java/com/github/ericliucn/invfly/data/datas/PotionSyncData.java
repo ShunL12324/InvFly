@@ -8,7 +8,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;

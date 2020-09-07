@@ -6,7 +6,6 @@ import com.github.ericliucn.invfly.exception.SerializeException;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 import java.util.Optional;
 

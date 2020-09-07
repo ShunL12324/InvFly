@@ -3,8 +3,6 @@ package com.github.ericliucn.invfly.commands;
 
 import com.github.ericliucn.invfly.Invfly;
 import com.github.ericliucn.invfly.service.SyncDataService;
-import com.github.ericliucn.invfly.config.Message;
-import com.github.ericliucn.invfly.utils.Utils;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -19,11 +17,10 @@ public class LoadCommand implements CommandExecutor {
 
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) {
-        Message message = Invfly.instance.getConfigLoader().getMessage();
         args.<User>getOne("user").ifPresent(user -> {
+            System.out.println(Invfly.instance.getDatabaseManager().isDataExists(user.getUniqueId()));
             SyncDataService syncDataService = Invfly.instance.getService();
             syncDataService.loadUerData(user, false);
-            src.sendMessage(Utils.toText(message.loadSuccessful));
         });
         return CommandResult.success();
     }

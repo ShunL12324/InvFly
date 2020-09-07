@@ -102,12 +102,12 @@ public class InvFlyConfig {
                 "Especially for people who use bungeecord \n" +
                 "When player switch server, it need some time to wait mysql finish the writing process \n" +
                 "The unit is millisecond (1 second = 1000 milliseconds)")
-        public long delay = 500;
+        public long initialDelayWhenJoin = 500;
 
         @Setting(comment = "If Invfly find the latest data does not marked as 'disconnect'\n" +
                 "Which means the save data operation of previous server may not done yet\n" +
                 "And if this value is greater than 0, Invfly will retry several times to wait for right data as you set")
-        public int retry = 5;
+        public int retryTimes = 5;
 
         @Setting(comment = "Set this to true means if finally failed to load right data for player\n" +
                 "This player's data will not be save or load in current server to prevent dirty data\n" +
@@ -118,10 +118,13 @@ public class InvFlyConfig {
         public boolean preventDirtyData = false;
 
         @Setting(comment = "How long for next retry (seconds)")
-        public int nextRetry = 1;
+        public int nextRetryTime = 1;
 
         @Setting
         public boolean saveWhenWorldSave = true;
+
+        @Setting
+        public int loadTimeOut = 5;
 
     }
 

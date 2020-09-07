@@ -1,11 +1,8 @@
 package com.github.ericliucn.invfly.data;
 
-import com.github.ericliucn.invfly.event.DoneLoadEvent;
-import com.github.ericliucn.invfly.event.PreLoadDataEvent;
 import com.github.ericliucn.invfly.exception.DeserializeException;
 import com.github.ericliucn.invfly.exception.SerializeException;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 public interface SyncData {
 

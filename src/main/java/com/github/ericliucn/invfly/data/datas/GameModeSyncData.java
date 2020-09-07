@@ -5,7 +5,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 public class GameModeSyncData implements SyncData {
 
