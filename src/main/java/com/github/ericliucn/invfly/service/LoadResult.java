@@ -3,8 +3,8 @@ package com.github.ericliucn.invfly.service;
 import com.github.ericliucn.invfly.Invfly;
 import com.github.ericliucn.invfly.data.EnumResult;
 import com.github.ericliucn.invfly.data.StorageData;
-import com.github.ericliucn.invfly.data.SyncData;
-import com.github.ericliucn.invfly.event.LoadAllEvent;
+import com.github.ericliucn.invfly.api.SyncData;
+import com.github.ericliucn.invfly.event.LoadAllEventImpl;
 import com.github.ericliucn.invfly.event.LoadSingleEvent;
 import com.github.ericliucn.invfly.exception.DeserializeException;
 import com.github.ericliucn.invfly.exception.NoSuchDataException;
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class LoadResult {
 
-    private final UUID uuid;
+    private final UUID taskUUID;
     private final List<SyncData> dataList;
     private final User user;
     private final StorageData data;
@@ -44,31 +44,29 @@ public class LoadResult {
         this.sync = sync;
         this.user = user;
         this.data = data;
-        this.uuid = uuid;
+        this.taskUUID = uuid;
         this.finishCount = new AtomicInteger(0);
         this.timeOut = Invfly.instance.getConfigLoader().getConfig().general.loadTimeOut;
-        new LoadAllEvent.Pre(uuid, user, dataList, data);
+        new LoadAllEventImpl.Pre(uuid, user, dataList, data);
         this.timeOutTask();
         this.load();
     }
 
     private void timeOutTask(){
         async.schedule(() -> {
-            if (postAlready) return;
-            resultFutureMap.forEach((key, value) -> {
-                if (!value.isDone()) {
-                    value.cancel(false);
-                    resultMap.put(key, EnumResult.FAIL);
-                }else {
-                    try {
-                        resultMap.put(key, value.get());
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                        resultMap.put(key, EnumResult.FAIL);
-                    }
-                }
-            });
-            sync.submit(() -> new LoadAllEvent.Done(uuid, user, dataList, data, resultMap));
+
+            if (!postAlready){
+                resultFutureMap.entrySet()
+                        .stream()
+                        .filter(entry -> !entry.getValue().isDone())
+                        .map(entry -> {
+                            entry.getValue().cancel(false);
+                            resultMap.put(entry.getKey(), EnumResult.FAIL);
+                            return null;
+                        })
+                        .close();
+            }
+            sync.submit(() -> new LoadAllEventImpl.Done(taskUUID, user, dataList, data, resultMap));
         }, this.timeOut, TimeUnit.SECONDS);
 
     }
@@ -175,7 +173,7 @@ public class LoadResult {
 
     private void checkAllDone(){
         if (isDone() && !postAlready){
-            sync.submit(()->{ new LoadAllEvent.Done(uuid, user, dataList, data, getResultMap()); });
+            sync.submit(()->{ new LoadAllEventImpl.Done(taskUUID, user, dataList, data, getResultMap()); });
             this.postAlready = true;
         }
     }
@@ -184,16 +182,16 @@ public class LoadResult {
         return user;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public UUID getTaskUUID() {
+        return taskUUID;
     }
 
     private void postSingeLoadEvent(SyncData syncData, EnumResult result, boolean done){
         sync.submit(() -> {
             if (done){
-                new LoadSingleEvent.Done(uuid, user, data, syncData, result);
+                new LoadSingleEvent.Done(taskUUID, user, data, syncData, result);
             }else {
-                new LoadSingleEvent.Pre(uuid, user, data, syncData);
+                new LoadSingleEvent.Pre(taskUUID, user, data, syncData);
             }
         });
     }

@@ -73,7 +73,7 @@ public class EventHandler {
                     // first join
                     if (!storageData.isDisconnect()){
                         // wrong data
-                        player.sendMessage(Utils.toText(message.retry).replace("%second%", Text.of(config.general.nextRetryTime)));
+                        player.sendMessage(message.getMessage("info.retry").replace("%second%", Text.of(config.general.nextRetryTime)));
                         if (config.general.retryTimes > 0) {
                             asyncExecutor.scheduleAtFixedRate(new Retry(player), config.general.nextRetryTime, config.general.nextRetryTime, TimeUnit.SECONDS);
                         }
@@ -110,13 +110,13 @@ public class EventHandler {
                 this.cancel();
             }else {
                 if (count < config.general.retryTimes){
-                    player.sendMessage(Utils.toText(message.retry).replace("%second%", Text.of(config.general.nextRetryTime)));
+                    player.sendMessage(message.getMessage("info.retry").replace("%second%", Text.of(config.general.nextRetryTime)));
                 }else if (count == config.general.retryTimes){
                     if (!config.general.preventDirtyData){
-                        player.sendMessage(Utils.toText(message.retryFailAndTryToLoadLatestData));
+                        player.sendMessage(message.getMessage("info.failed.trylatest"));
                         service.loadUserData(player, data, true);
                     }else {
-                        player.sendMessage(Utils.toText(message.finallyFailToLoad));
+                        player.sendMessage(message.getMessage("info.failed.finally"));
                     }
                     this.cancel();
                 }else {

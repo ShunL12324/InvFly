@@ -1,6 +1,6 @@
 package com.github.ericliucn.invfly.data.datas;
 
-import com.github.ericliucn.invfly.data.SyncData;
+import com.github.ericliucn.invfly.api.SyncData;
 import com.github.ericliucn.invfly.exception.DeserializeException;
 import com.github.ericliucn.invfly.exception.SerializeException;
 import org.spongepowered.api.data.DataTransactionResult;

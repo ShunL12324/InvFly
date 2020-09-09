@@ -8,8 +8,6 @@ import java.util.HashMap;
 
 public class GsonTypes {
 
-    public static final Type INVTYPE = new TypeToken<HashMap<Integer, String>>(){}.getType();
-
     public static final Type ALLDATATYPE = new TypeToken<HashMap<String, String>>(){}.getType();
 
     public static final Type POTIONTYPE = new TypeToken<ArrayList<String>>(){}.getType();

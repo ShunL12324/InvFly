@@ -17,10 +17,10 @@ public class ReloadCommand implements CommandExecutor {
         Invfly.instance.getAsyncExecutor().submit(()->{
             try {
                 Invfly.instance.reload();
-                src.sendMessage(Utils.toText(message.reloadSuccess));
+                src.sendMessage(message.getMessage("command.reload.success"));
             }catch (Exception e){
                 e.printStackTrace();
-                src.sendMessage(Utils.toText(message.reloadFail));
+                src.sendMessage(message.getMessage("command.reload.fail"));
             }
         });
         return CommandResult.success();

@@ -1,4 +1,4 @@
-package com.github.ericliucn.invfly.config;
+package com.github.ericliucn.invfly.config.configserializers;
 
 import com.github.ericliucn.invfly.Invfly;
 import com.google.common.reflect.TypeToken;

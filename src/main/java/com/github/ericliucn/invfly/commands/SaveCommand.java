@@ -22,7 +22,6 @@ public class SaveCommand implements CommandExecutor {
             SyncDataService syncDataService = Invfly.instance.getService();
             Invfly.instance.getAsyncExecutor().submit(()->{
                 syncDataService.saveUserData(user, false);
-                src.sendMessage(Utils.toText(message.saveSuccessful));
             });
         });
         return CommandResult.success();

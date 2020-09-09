@@ -48,7 +48,7 @@ public class ListCommand implements CommandExecutor {
             Duration defaultDuration = Invfly.instance.getConfigLoader().getConfig().general.outDate;
             args.<User>getOne("user").ifPresent(thisUser -> {
                 user = thisUser;
-                builder.title(Utils.toText(message.gui.title).replace("%user%", Utils.toText(user.getName())));
+                builder.title(message.getMessage("gui.title").replace("%user%", Utils.toText(user.getName())));
                 Duration duration = args.<Duration>getOne("duration").orElse(defaultDuration);
                 dataList = databaseManager.getAllData(thisUser, duration);
                 builder.contents(getTexts(dataList, user)).sendTo(src);
@@ -78,24 +78,24 @@ public class ListCommand implements CommandExecutor {
             Text id = Utils.toText("&a[" + "ID:" + data.getId() + "]");
             String timeStr = new SimpleDateFormat("HH:mm:ss").format(data.getTime());
             Text time = Utils.toText("&e[" + timeStr + "]");
-            Text toPlayer = Utils.toText(message.gui.recoverToUser)
+            Text toPlayer = message.getMessage("gui.button.to.user")
                     .toBuilder()
                     .onClick(TextActions.executeCallback(source -> load(data, user, source)))
-                    .onHover(TextActions.showText(Utils.toText(message.gui.recoverToUserTip)))
+                    .onHover(TextActions.showText(message.getMessage("gui.button.to.user.tip")))
                     .build();
-            Text toMe = Utils.toText(message.gui.recoverToMe)
+            Text toMe = message.getMessage("gui.button.to.me")
                     .toBuilder()
                     .onClick(TextActions.executeCallback(source -> load(data, ((User) source), source)))
-                    .onHover(TextActions.showText(Utils.toText(message.gui.recoverToMeTip)))
+                    .onHover(TextActions.showText(message.getMessage("gui.button.to.me.tip")))
                     .build();
-            Text detail = Utils.toText(message.gui.detail)
+            Text detail = message.getMessage("gui.button.detail")
                     .toBuilder()
-                    .onHover(TextActions.showText(Utils.toText(message.gui.detailTip)))
+                    .onHover(TextActions.showText(message.getMessage("gui.button.detail.tip")))
                     .onClick(TextActions.executeCallback(source -> showDetail(data, source, user)))
                     .build();
-            Text delete = Utils.toText(message.gui.delete)
+            Text delete = message.getMessage("gui.button.delete")
                     .toBuilder()
-                    .onHover(TextActions.showText(Utils.toText(message.gui.deleteTip)))
+                    .onHover(TextActions.showText(message.getMessage("gui.button.delete.tip")))
                     .onClick(TextActions.executeCallback(source -> deleteRecord(data, source, user)))
                     .build();
             Text one = Text.builder().append(index, id, time, toPlayer, toMe, detail, delete).build();
@@ -107,50 +107,49 @@ public class ListCommand implements CommandExecutor {
     private void load(StorageData data, User user, CommandSource source){
         asyncExecutor.submit(()->{
             service.loadUserData(user, data, false);
-            source.sendMessage(Utils.toText(message.loadSuccessful));
         });
     }
 
     private void showDetail(StorageData data, CommandSource source, User user){
         List<Text> texts = new ArrayList<>();
-        Text id = Utils.toText(message.gui.id)
+        Text id = message.getMessage("gui.id")
                 .toBuilder()
                 .append(Utils.toText(String.valueOf(data.getId())))
                 .build();
-        Text uuid = Utils.toText(message.gui.uuid)
+        Text uuid = message.getMessage("gui.uuid")
                 .toBuilder()
                 .append(Utils.toText(data.getUuid()))
                 .build();
-        Text name = Utils.toText(message.gui.userName)
+        Text name = message.getMessage("gui.name")
                 .toBuilder()
                 .append(Utils.toText(data.getName()))
                 .build();
-        Text time = Utils.toText(message.gui.time)
+        Text time = message.getMessage("gui.time")
                 .toBuilder()
                 .append(Utils.toText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(data.getTime())))
                 .build();
-        Text server = Utils.toText(message.gui.server)
+        Text server = message.getMessage("gui.server")
                 .toBuilder()
                 .append(Utils.toText(data.getServerName()))
                 .build();
-        Text isDisconnect = Utils.toText(message.gui.disconnect)
+        Text isDisconnect = message.getMessage("gui.disconnect")
                 .toBuilder()
                 .append(Utils.toText(String.valueOf(data.isDisconnect())))
                 .build();
-        Text recoverToUser = Utils.toText(message.gui.recoverToUser)
+        Text recoverToUser = message.getMessage("gui.button.to.user")
                 .toBuilder()
                 .onClick(TextActions.executeCallback(clickSource -> load(data, user, clickSource)))
-                .onHover(TextActions.showText(Utils.toText(message.gui.recoverToUserTip)))
+                .onHover(TextActions.showText(message.getMessage("gui.button.to.user.tip")))
                 .build();
-        Text recoverMe = Utils.toText(message.gui.recoverToMe)
+        Text recoverMe = message.getMessage("gui.button.to.me")
                 .toBuilder()
                 .onClick(TextActions.executeCallback(clickSource -> load(data, ((User) clickSource), clickSource)))
-                .onHover(TextActions.showText(Utils.toText(message.gui.recoverToMeTip)))
+                .onHover(TextActions.showText(message.getMessage("gui.button.to.me.tip")))
                 .build();
-        Text delete = Utils.toText(message.gui.delete)
+        Text delete = message.getMessage("gui.button.delete")
                 .toBuilder()
                 .onClick(TextActions.executeCallback(clickSource -> deleteRecord(data, clickSource, user)))
-                .onHover(TextActions.showText(Utils.toText(message.gui.deleteTip)))
+                .onHover(TextActions.showText(message.getMessage("gui.button.delete.tip")))
                 .build();
         Text buttons = Text.builder()
                 .append(recoverToUser, recoverMe ,delete)
@@ -162,7 +161,7 @@ public class ListCommand implements CommandExecutor {
         texts.add(server);
         texts.add(isDisconnect);
         paginationService.builder()
-                .title(Utils.toText(message.gui.title).replace("%user%", Utils.toText(user.getName())))
+                .title(message.getMessage("gui.title").replace("%user%", Utils.toText(user.getName())))
                 .padding(Utils.toText("&a=")).contents(texts).footer(buttons)
                 .sendTo(source);
     }
@@ -172,15 +171,13 @@ public class ListCommand implements CommandExecutor {
             try {
                 dataList.remove(data);
                 paginationService.builder()
-                        .title(Utils.toText(message.gui.title).replace("%user%", Utils.toText(user.getName())))
+                        .title(message.getMessage("gui.title").replace("%user%", Utils.toText(user.getName())))
                         .padding(Utils.toText("&a="))
                         .contents(getTexts(dataList, user))
                         .sendTo(source);
                 databaseManager.deleteRecord(data.getId());
-                source.sendMessage(Utils.toText(message.deleteSuccessful));
             }catch (Exception e){
                 e.printStackTrace();
-                source.sendMessage(Utils.toText(message.deleteFail));
             }
         });
     }

@@ -1,6 +1,7 @@
 package com.github.ericliucn.invfly.data;
 
 import com.github.ericliucn.invfly.Invfly;
+import com.github.ericliucn.invfly.api.SyncData;
 import org.spongepowered.api.entity.living.player.User;
 
 import java.sql.Timestamp;

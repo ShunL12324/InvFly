@@ -1,12 +1,12 @@
 package com.github.ericliucn.invfly.service;
 
 import com.github.ericliucn.invfly.Invfly;
-import com.github.ericliucn.invfly.data.GsonTypes;
+import com.github.ericliucn.invfly.api.SaveAllEvent;
+import com.github.ericliucn.invfly.api.SyncData;
+import com.github.ericliucn.invfly.config.Message;
 import com.github.ericliucn.invfly.data.StorageData;
-import com.github.ericliucn.invfly.data.SyncData;
-import com.github.ericliucn.invfly.event.LoadAllEvent;
+import com.github.ericliucn.invfly.event.LoadAllEventImpl;
 import com.github.ericliucn.invfly.exception.NoResultException;
-import com.github.ericliucn.invfly.exception.SerializeException;
 import com.github.ericliucn.invfly.utils.Utils;
 import com.google.gson.Gson;
 import org.spongepowered.api.Sponge;
@@ -19,16 +19,18 @@ import java.util.*;
 
 public class SyncDataService {
 
-    private static final Gson gson = new Gson();
     private final List<SyncData> syncDataList = new ArrayList<>();
     private final SpongeExecutorService asyncExecutor;
     private final SpongeExecutorService syncExecutor;
     private static final Map<UUID, LoadResult> LOADTASKS = new HashMap<>();
+    private static final Map<UUID, SaveResult> SAVETASKS = new HashMap<>();
+    private final Message message;
 
     public SyncDataService(){
         Scheduler scheduler = Sponge.getScheduler();
         asyncExecutor = scheduler.createAsyncExecutor(Invfly.instance);
         syncExecutor = scheduler.createSyncExecutor(Invfly.instance);
+        message = Invfly.instance.getConfigLoader().getMessage();
         Sponge.getEventManager().registerListeners(Invfly.instance, this);
     }
 
@@ -43,36 +45,44 @@ public class SyncDataService {
     }
 
     @Listener
-    public void onLoadAllPre(LoadAllEvent.Pre event){
-        event.getTargetUser().getPlayer().ifPresent(player -> player.sendMessage(Utils.toText("&b[InvFly] &eLoading")));
+    public void onLoadAllPre(LoadAllEventImpl.Pre event){
+        event.getTargetUser().getPlayer().ifPresent(player -> player.sendMessage(message.getMessage("task.load.loading")));
     }
 
     @Listener
-    public void onLoadAllDone(LoadAllEvent.Done event) throws NoResultException {
+    public void onLoadAllDone(LoadAllEventImpl.Done event) throws NoResultException {
         UUID taskUUID = event.getTaskUUID();
         LoadResult loadResult = LOADTASKS.get(taskUUID);
         if (loadResult == null) throw new NoResultException(taskUUID);
         if (loadResult.isAllSuccess()){
-            loadResult.getUser().getPlayer().ifPresent(player -> player.sendMessage(Utils.toText("&b[InvFly] &aLoad Successful!")));
+            loadResult.getUser().getPlayer().ifPresent(player -> player.sendMessage(message.getMessage("task.load.success")));
         }else {
-            loadResult.getUser().getPlayer().ifPresent(player -> player.sendMessage(Utils.toText("&b[InvFly] &4Fail to load some data!")));
+            loadResult.getUser().getPlayer().ifPresent(player -> player.sendMessage(message.getMessage("task.load.fail")));
         }
     }
 
     public void saveUserData(User user, boolean isDisconnect){
-        Map<String, String> all = new HashMap<>();
-        for(SyncData syncData:syncDataList){
-            try {
-                all.put(syncData.getID(), syncData.getSerializedData(user));
-            } catch (SerializeException e) {
-                e.printStackTrace();
-            }
-        }
-        StorageData storageData = new StorageData(user, gson.toJson(all, GsonTypes.ALLDATATYPE), isDisconnect);
-        Invfly.instance.getDatabaseManager().saveData(storageData);
+        UUID taskUUID = UUID.randomUUID();
+        SAVETASKS.put(taskUUID, new SaveResult(taskUUID, user, syncDataList, this.asyncExecutor, this.syncExecutor, isDisconnect));
     }
 
-    public LoadResult getResult(UUID taskUUID){
+    @Listener
+    public void saveAllEventPre(SaveAllEvent.Pre event){
+        event.getTargetUser().getPlayer().ifPresent(player -> player.sendMessage(message.getMessage("task.save.saving")));
+    }
+
+    @Listener
+    public void saveAllEventDone(SaveAllEvent.Done event){
+        UUID taskUUID = event.getTaskUUID();
+        SaveResult saveResult = SAVETASKS.get(taskUUID);
+        if (saveResult.isAllSuccess()){
+            event.getTargetUser().getPlayer().ifPresent(player -> player.sendMessage(message.getMessage("task.save.success")));
+        }else {
+            event.getTargetUser().getPlayer().ifPresent(player -> player.sendMessage(message.getMessage("task.save.fail")));
+        }
+    }
+
+    public LoadResult getLoadResult(UUID taskUUID){
         return LOADTASKS.get(taskUUID);
     }
 
@@ -90,7 +100,7 @@ public class SyncDataService {
     }
 
     public void unregister(SyncData data){
-        this.syncDataList.remove(data);
+        this.syncDataList.stream().filter(syncData -> syncData.getID().equals(data.getID())).map(this.syncDataList::remove).close();
     }
 
 

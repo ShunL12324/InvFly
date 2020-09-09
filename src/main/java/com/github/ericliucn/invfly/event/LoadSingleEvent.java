@@ -3,7 +3,7 @@ package com.github.ericliucn.invfly.event;
 import com.github.ericliucn.invfly.Invfly;
 import com.github.ericliucn.invfly.data.EnumResult;
 import com.github.ericliucn.invfly.data.StorageData;
-import com.github.ericliucn.invfly.data.SyncData;
+import com.github.ericliucn.invfly.api.SyncData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class LoadSingleEvent {
 
-    public static class Pre implements SyncSingleEvent{
+    public static class Pre implements com.github.ericliucn.invfly.api.LoadSingleEvent {
 
         private final UUID parentTaskUUID;
         private final StorageData data;
@@ -56,7 +56,7 @@ public class LoadSingleEvent {
         }
     }
 
-    public static class Done implements SyncSingleEvent{
+    public static class Done implements com.github.ericliucn.invfly.api.LoadSingleEvent {
 
         private final UUID parentTaskUUID;
         private final StorageData data;

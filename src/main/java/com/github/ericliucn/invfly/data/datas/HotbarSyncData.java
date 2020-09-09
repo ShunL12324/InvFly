@@ -1,6 +1,6 @@
 package com.github.ericliucn.invfly.data.datas;
 
-import com.github.ericliucn.invfly.data.SyncData;
+import com.github.ericliucn.invfly.api.SyncData;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;

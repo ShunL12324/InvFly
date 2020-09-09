@@ -1,12 +1,11 @@
-package com.github.ericliucn.invfly.event;
+package com.github.ericliucn.invfly.api;
 
 import com.github.ericliucn.invfly.data.StorageData;
-import com.github.ericliucn.invfly.data.SyncData;
 import org.spongepowered.api.event.user.TargetUserEvent;
 
 import java.util.UUID;
 
-public interface SyncSingleEvent extends TargetUserEvent {
+public interface LoadSingleEvent extends TargetUserEvent {
 
     StorageData getStorageData();
 

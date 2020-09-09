@@ -18,7 +18,6 @@ public class LoadCommand implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) {
         args.<User>getOne("user").ifPresent(user -> {
-            System.out.println(Invfly.instance.getDatabaseManager().isDataExists(user.getUniqueId()));
             SyncDataService syncDataService = Invfly.instance.getService();
             syncDataService.loadUerData(user, false);
         });

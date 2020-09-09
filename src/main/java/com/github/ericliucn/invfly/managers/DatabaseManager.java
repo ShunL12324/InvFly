@@ -1,8 +1,12 @@
 package com.github.ericliucn.invfly.managers;
 
 import com.github.ericliucn.invfly.Invfly;
+import com.github.ericliucn.invfly.api.SyncData;
 import com.github.ericliucn.invfly.config.InvFlyConfig;
+import com.github.ericliucn.invfly.data.EnumResult;
 import com.github.ericliucn.invfly.data.StorageData;
+import com.github.ericliucn.invfly.event.SaveAllEventImpl;
+import com.github.ericliucn.invfly.utils.Utils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -18,6 +22,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class DatabaseManager {
@@ -86,7 +91,7 @@ public class DatabaseManager {
         }
     }
 
-    public void saveData(StorageData data){
+    public void saveData(StorageData data, User user, UUID taskUUID, List<SyncData> dataList, Map<SyncData, EnumResult> resultMap){
         String sql = String.format("insert into %s (uuid, name, data, disconnect, server) values('%s', '%s', '%s', %b, '%s')",
                 table, data.getUuid(), data.getName(), StringEscapeUtils.escapeJava(data.getData()), data.isDisconnect(), data.getServerName());
         try (
@@ -94,6 +99,7 @@ public class DatabaseManager {
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ){
             statement.execute();
+            Utils.postEvent(new SaveAllEventImpl.Done(user, taskUUID, dataList, data, resultMap));
         }catch (SQLException e){
             e.printStackTrace();
         }
@@ -204,7 +210,7 @@ public class DatabaseManager {
                 ResultSet resultSet = statement.executeQuery()
                 ){
             while (resultSet.next()){
-                return resultSet.first();
+                return resultSet.getBoolean(1);
             }
         }catch (SQLException e){
             e.printStackTrace();

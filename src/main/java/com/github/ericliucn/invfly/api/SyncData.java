@@ -1,4 +1,4 @@
-package com.github.ericliucn.invfly.data;
+package com.github.ericliucn.invfly.api;
 
 import com.github.ericliucn.invfly.exception.DeserializeException;
 import com.github.ericliucn.invfly.exception.SerializeException;
