@@ -1,7 +1,7 @@
 package com.github.ericliucn.invfly.data.datas;
 
-import com.github.ericliucn.invfly.data.GsonTypes;
 import com.github.ericliucn.invfly.api.SyncData;
+import com.github.ericliucn.invfly.data.GsonTypes;
 import com.google.gson.Gson;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;

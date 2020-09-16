@@ -4,8 +4,10 @@ import com.github.ericliucn.invfly.Invfly;
 import com.github.ericliucn.invfly.utils.Utils;
 import org.spongepowered.api.text.Text;
 
-import java.io.*;
-import java.nio.charset.Charset;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 

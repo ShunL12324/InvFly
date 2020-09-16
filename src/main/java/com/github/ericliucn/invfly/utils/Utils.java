@@ -1,7 +1,6 @@
 package com.github.ericliucn.invfly.utils;
 
 import com.github.ericliucn.invfly.Invfly;
-import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.text.Text;

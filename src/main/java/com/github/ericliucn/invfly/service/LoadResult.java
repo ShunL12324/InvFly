@@ -1,13 +1,15 @@
 package com.github.ericliucn.invfly.service;
 
 import com.github.ericliucn.invfly.Invfly;
+import com.github.ericliucn.invfly.api.SyncData;
 import com.github.ericliucn.invfly.data.EnumResult;
 import com.github.ericliucn.invfly.data.StorageData;
-import com.github.ericliucn.invfly.api.SyncData;
 import com.github.ericliucn.invfly.event.LoadAllEventImpl;
 import com.github.ericliucn.invfly.event.LoadSingleEvent;
 import com.github.ericliucn.invfly.exception.DeserializeException;
 import com.github.ericliucn.invfly.exception.NoSuchDataException;
+import com.github.ericliucn.invfly.utils.Utils;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 
@@ -35,8 +37,9 @@ public class LoadResult {
     private final int dataSize;
     private boolean postAlready;
     private final int timeOut;
+    private final CommandSource source;
 
-    public LoadResult(UUID uuid, List<SyncData> dataList, User user, StorageData data, SpongeExecutorService async, SpongeExecutorService sync, boolean checkPermission){
+    public LoadResult(UUID uuid, List<SyncData> dataList, User user, StorageData data, SpongeExecutorService async, SpongeExecutorService sync, boolean checkPermission, CommandSource source){
         this.dataList = dataList;
         this.dataSize = dataList.size();
         this.checkPermission = checkPermission;
@@ -45,9 +48,10 @@ public class LoadResult {
         this.user = user;
         this.data = data;
         this.taskUUID = uuid;
+        this.source = source;
         this.finishCount = new AtomicInteger(0);
         this.timeOut = Invfly.instance.getConfigLoader().getConfig().general.loadTimeOut;
-        new LoadAllEventImpl.Pre(uuid, user, dataList, data);
+        new LoadAllEventImpl.Pre(uuid, user, dataList, data, source);
         this.timeOutTask();
         this.load();
     }
@@ -65,8 +69,8 @@ public class LoadResult {
                             return null;
                         })
                         .close();
+                sync.submit(() -> new LoadAllEventImpl.Done(taskUUID, user, dataList, data, resultMap, source));
             }
-            sync.submit(() -> new LoadAllEventImpl.Done(taskUUID, user, dataList, data, resultMap));
         }, this.timeOut, TimeUnit.SECONDS);
 
     }
@@ -173,7 +177,7 @@ public class LoadResult {
 
     private void checkAllDone(){
         if (isDone() && !postAlready){
-            sync.submit(()->{ new LoadAllEventImpl.Done(taskUUID, user, dataList, data, getResultMap()); });
+            sync.submit(()->{ new LoadAllEventImpl.Done(taskUUID, user, dataList, data, getResultMap(), source); });
             this.postAlready = true;
         }
     }
@@ -189,9 +193,9 @@ public class LoadResult {
     private void postSingeLoadEvent(SyncData syncData, EnumResult result, boolean done){
         sync.submit(() -> {
             if (done){
-                new LoadSingleEvent.Done(taskUUID, user, data, syncData, result);
+                Utils.postEvent(new LoadSingleEvent.Done(taskUUID, user, data, syncData, result));
             }else {
-                new LoadSingleEvent.Pre(taskUUID, user, data, syncData);
+                Utils.postEvent(new LoadSingleEvent.Pre(taskUUID, user, data, syncData));
             }
         });
     }

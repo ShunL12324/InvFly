@@ -19,7 +19,7 @@ public class LoadCommand implements CommandExecutor {
     public CommandResult execute(CommandSource src, CommandContext args) {
         args.<User>getOne("user").ifPresent(user -> {
             SyncDataService syncDataService = Invfly.instance.getService();
-            syncDataService.loadUerData(user, false);
+            syncDataService.loadUerData(user, false, src);
         });
         return CommandResult.success();
     }

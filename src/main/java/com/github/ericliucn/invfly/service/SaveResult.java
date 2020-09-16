@@ -9,6 +9,7 @@ import com.github.ericliucn.invfly.exception.SerializeException;
 import com.github.ericliucn.invfly.utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 
@@ -37,9 +38,10 @@ public class SaveResult {
     private boolean alreadyPost;
     private final static Type TYPE = new TypeToken<Map<String, String>>(){}.getType();
     private final static Gson GSON = new Gson();
+    private final CommandSource source;
 
 
-    public SaveResult(UUID taskUUID, User user, List<SyncData> syncDataList, SpongeExecutorService async, SpongeExecutorService sync, boolean isDisconnect){
+    public SaveResult(UUID taskUUID, User user, List<SyncData> syncDataList, SpongeExecutorService async, SpongeExecutorService sync, boolean isDisconnect, CommandSource source){
         this.async = async;
         this.sync = sync;
         this.taskUUID = taskUUID;
@@ -49,6 +51,7 @@ public class SaveResult {
         this.timeOut = Invfly.instance.getConfigLoader().getConfig().general.loadTimeOut;
         this.listSize = syncDataList.size();
         this.count = new AtomicInteger(0);
+        this.source = source;
         this.serializeData();
         this.timeOutTask();
     }
@@ -66,7 +69,7 @@ public class SaveResult {
     }
 
     private void serializeData(){
-        Utils.postEvent(new SaveAllEventImpl.Pre(user, taskUUID, dataList, storageData));
+        Utils.postEvent(new SaveAllEventImpl.Pre(user, taskUUID, dataList, storageData, source));
         for (SyncData syncData:dataList){
             if (syncData.shouldAsync()){
                 serializeAsync(syncData);
@@ -114,7 +117,7 @@ public class SaveResult {
 
     private void postData(){
         this.storageData = new StorageData(user, GSON.toJson(stringData, TYPE), this.isDisconnect);
-        async.submit(() -> Invfly.instance.getDatabaseManager().saveData(this.storageData, user, taskUUID, dataList, serializeResults));
+        async.submit(() -> Invfly.instance.getDatabaseManager().saveData(this.storageData, user, taskUUID, dataList, serializeResults, source));
         this.alreadyPost = true;
     }
 

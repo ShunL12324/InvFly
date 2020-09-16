@@ -1,10 +1,9 @@
 package com.github.ericliucn.invfly.event;
 
 import com.github.ericliucn.invfly.Invfly;
+import com.github.ericliucn.invfly.api.SyncData;
 import com.github.ericliucn.invfly.data.EnumResult;
 import com.github.ericliucn.invfly.data.StorageData;
-import com.github.ericliucn.invfly.api.SyncData;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
@@ -26,7 +25,6 @@ public class LoadSingleEvent {
             this.data = data;
             this.syncData = syncData;
             this.user = user;
-            Sponge.getEventManager().post(this);
         }
 
         @Override
@@ -70,7 +68,6 @@ public class LoadSingleEvent {
             this.syncData = syncData;
             this.user = user;
             this.result = result;
-            Sponge.getEventManager().post(this);
         }
 
         @Override

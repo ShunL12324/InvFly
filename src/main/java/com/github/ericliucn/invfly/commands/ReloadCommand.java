@@ -2,7 +2,6 @@ package com.github.ericliucn.invfly.commands;
 
 import com.github.ericliucn.invfly.Invfly;
 import com.github.ericliucn.invfly.config.Message;
-import com.github.ericliucn.invfly.utils.Utils;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;

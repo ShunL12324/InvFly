@@ -42,9 +42,6 @@ public class InvFlyConfig {
         @ConfigSerializable
         public static class Basic {
 
-            @Setting(comment = "Storage method you want to use. Possible option: mysql/h2")
-            public String method = "mysql";
-
             @Setting
             public String host = "127.0.0.1";
 
@@ -95,7 +92,7 @@ public class InvFlyConfig {
         public String serverName = "GLOBAL";
 
         @Setting(comment = "Freeze player inventory before load data success")
-        public boolean freezeInventory = true;
+        public boolean lockInv = true;
 
         @Setting(comment = "Due to the save data operation need some time \n " +
                 "It's better to set a delay for load data \n " +

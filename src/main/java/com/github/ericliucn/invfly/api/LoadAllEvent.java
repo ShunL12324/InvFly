@@ -2,6 +2,7 @@ package com.github.ericliucn.invfly.api;
 
 import com.github.ericliucn.invfly.data.EnumResult;
 import com.github.ericliucn.invfly.data.StorageData;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.user.TargetUserEvent;
 
 import java.util.List;
@@ -24,6 +25,8 @@ public interface LoadAllEvent extends TargetUserEvent {
      * @return The unique task ID
      */
     UUID getTaskUUID();
+
+    CommandSource getCmdSource();
 
     /**
      * Before the actual sync operation start

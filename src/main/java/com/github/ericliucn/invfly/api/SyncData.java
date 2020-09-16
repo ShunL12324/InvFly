@@ -2,6 +2,7 @@ package com.github.ericliucn.invfly.api;
 
 import com.github.ericliucn.invfly.exception.DeserializeException;
 import com.github.ericliucn.invfly.exception.SerializeException;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 
 public interface SyncData {
@@ -41,6 +42,10 @@ public interface SyncData {
 
     default boolean shouldRegListener(){
         return false;
+    }
+
+    default void unregisterListener(){
+        Sponge.getEventManager().unregisterListeners(this);
     }
 
 }

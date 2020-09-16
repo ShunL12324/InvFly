@@ -21,6 +21,7 @@ public class BaseCommand implements CommandExecutor {
                 .child(SaveCommand.build(), "save")
                 .child(ReloadCommand.build(), "reload")
                 .child(ListCommand.build(), "list")
+                .child(UnlockCommand.build(), "unlock")
                 .build();
     }
 }

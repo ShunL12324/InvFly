@@ -1,12 +1,11 @@
 package com.github.ericliucn.invfly.managers;
 
 import com.github.ericliucn.invfly.Invfly;
+import com.github.ericliucn.invfly.api.LoadAllEvent;
 import com.github.ericliucn.invfly.config.InvFlyConfig;
 import com.github.ericliucn.invfly.config.Message;
 import com.github.ericliucn.invfly.data.StorageData;
-import com.github.ericliucn.invfly.event.LoadSingleEvent;
 import com.github.ericliucn.invfly.service.SyncDataService;
-import com.github.ericliucn.invfly.utils.Utils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -17,7 +16,6 @@ import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
@@ -52,21 +50,13 @@ public class EventHandler {
 
     @Listener
     public void worldSave(SaveWorldEvent.Post event){
-        if (config.general.saveWhenWorldSave) {
-            World world = event.getTargetWorld();
-            for (Player player : world.getPlayers()) {
-                if (player.hasPermission("invfly.sync.auto")) {
-                    asyncExecutor.submit(() -> service.saveUserData(player, false));
-                }
-            }
-        }
         asyncExecutor.submit(()-> databaseManager.deleteOutDate(config.general.outDate));
     }
 
 
     @Listener
     public void onJoin(ClientConnectionEvent.Join event, @First Player player){
-        if (player.hasPermission("invfly.sync.auto")){
+        if (player.hasPermission("invfly.sync.auto.load")){
             asyncExecutor.schedule(()->{
                 StorageData storageData = databaseManager.getLatest(player);
                 if (storageData != null){
@@ -79,7 +69,7 @@ public class EventHandler {
                         }
                     }else {
                         //right data
-                        service.loadUserData(player, storageData, true);
+                        service.loadUserData(player, storageData, true, player);
                     }
                 }
             }, config.general.initialDelayWhenJoin, TimeUnit.MILLISECONDS);
@@ -88,8 +78,8 @@ public class EventHandler {
 
     @Listener
     public void disconnect(ClientConnectionEvent.Disconnect event, @First Player player){
-        if (player.hasPermission("invfly.sync.auto")) {
-            asyncExecutor.submit(() -> service.saveUserData(player, true));
+        if (player.hasPermission("invfly.sync.auto.save")) {
+            asyncExecutor.submit(() -> service.saveUserData(player, true, null));
         }
     }
 
@@ -106,7 +96,7 @@ public class EventHandler {
         public void run() {
             StorageData data = databaseManager.getLatest(player);
             if (data.isDisconnect()){
-                service.loadUserData(player, data, true);
+                service.loadUserData(player, data, true, player);
                 this.cancel();
             }else {
                 if (count < config.general.retryTimes){
@@ -114,7 +104,7 @@ public class EventHandler {
                 }else if (count == config.general.retryTimes){
                     if (!config.general.preventDirtyData){
                         player.sendMessage(message.getMessage("info.failed.trylatest"));
-                        service.loadUserData(player, data, true);
+                        service.loadUserData(player, data, true, player);
                     }else {
                         player.sendMessage(message.getMessage("info.failed.finally"));
                     }

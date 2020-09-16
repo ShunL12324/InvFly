@@ -10,6 +10,7 @@ import com.github.ericliucn.invfly.utils.Utils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.User;
 
 import javax.annotation.Nonnull;
@@ -47,12 +48,10 @@ public class DatabaseManager {
             setMinimumIdle(invConfig.storage.connectionPool.minIdleSize);
             setIdleTimeout(invConfig.storage.connectionPool.idleTimeout);
             setConnectionTimeout(invConfig.storage.connectionPool.connectionTimeout);
-            if (invConfig.storage.basic.method.equalsIgnoreCase("mysql")){
-                setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s?useSSL=false",
-                        invConfig.storage.basic.host,
-                        invConfig.storage.basic.port,
-                        invConfig.storage.basic.database));
-            }
+            setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s?useSSL=false",
+                    invConfig.storage.basic.host,
+                    invConfig.storage.basic.port,
+                    invConfig.storage.basic.database));
             setUsername(invConfig.storage.basic.username);
             setPassword(invConfig.storage.basic.password);
         }};
@@ -91,7 +90,7 @@ public class DatabaseManager {
         }
     }
 
-    public void saveData(StorageData data, User user, UUID taskUUID, List<SyncData> dataList, Map<SyncData, EnumResult> resultMap){
+    public void saveData(StorageData data, User user, UUID taskUUID, List<SyncData> dataList, Map<SyncData, EnumResult> resultMap, CommandSource source){
         String sql = String.format("insert into %s (uuid, name, data, disconnect, server) values('%s', '%s', '%s', %b, '%s')",
                 table, data.getUuid(), data.getName(), StringEscapeUtils.escapeJava(data.getData()), data.isDisconnect(), data.getServerName());
         try (
@@ -99,7 +98,7 @@ public class DatabaseManager {
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ){
             statement.execute();
-            Utils.postEvent(new SaveAllEventImpl.Done(user, taskUUID, dataList, data, resultMap));
+            Utils.postEvent(new SaveAllEventImpl.Done(user, taskUUID, dataList, data, resultMap, source));
         }catch (SQLException e){
             e.printStackTrace();
         }

@@ -3,7 +3,6 @@ package com.github.ericliucn.invfly.commands;
 import com.github.ericliucn.invfly.Invfly;
 import com.github.ericliucn.invfly.config.Message;
 import com.github.ericliucn.invfly.service.SyncDataService;
-import com.github.ericliucn.invfly.utils.Utils;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -21,7 +20,7 @@ public class SaveCommand implements CommandExecutor {
         args.<User>getOne("user").ifPresent(user -> {
             SyncDataService syncDataService = Invfly.instance.getService();
             Invfly.instance.getAsyncExecutor().submit(()->{
-                syncDataService.saveUserData(user, false);
+                syncDataService.saveUserData(user, false, src);
             });
         });
         return CommandResult.success();

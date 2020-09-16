@@ -2,10 +2,11 @@ package com.github.ericliucn.invfly.event;
 
 import com.github.ericliucn.invfly.Invfly;
 import com.github.ericliucn.invfly.api.LoadAllEvent;
+import com.github.ericliucn.invfly.api.SyncData;
 import com.github.ericliucn.invfly.data.EnumResult;
 import com.github.ericliucn.invfly.data.StorageData;
-import com.github.ericliucn.invfly.api.SyncData;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
@@ -21,12 +22,14 @@ public class LoadAllEventImpl implements LoadAllEvent {
     private final StorageData data;
     private final List<SyncData> dataList;
     private final User user;
+    private final CommandSource source;
 
-    public LoadAllEventImpl(UUID taskUUID, User user, List<SyncData> dataList, StorageData data){
+    public LoadAllEventImpl(UUID taskUUID, User user, List<SyncData> dataList, StorageData data, CommandSource source){
         this.taskUUID = taskUUID;
         this.data = data;
         this.dataList = dataList;
         this.user = user;
+        this.source = source;
     }
 
     @Override
@@ -55,11 +58,16 @@ public class LoadAllEventImpl implements LoadAllEvent {
         return Cause.builder().append(Invfly.instance).build(context);
     }
 
+    @Override
+    public CommandSource getCmdSource() {
+        return this.source;
+    }
+
     public static class Pre extends LoadAllEventImpl implements LoadAllEvent.Pre{
 
 
-        public Pre(UUID taskUUID, User user, List<SyncData> dataList, StorageData data){
-            super(taskUUID, user, dataList, data);
+        public Pre(UUID taskUUID, User user, List<SyncData> dataList, StorageData data, CommandSource source){
+            super(taskUUID, user, dataList, data, source);
             Sponge.getEventManager().post(this);
         }
 
@@ -69,8 +77,8 @@ public class LoadAllEventImpl implements LoadAllEvent {
 
         private final Map<SyncData, EnumResult> resultMap;
 
-        public Done(UUID taskUUID, User user, List<SyncData> dataList, StorageData data, Map<SyncData, EnumResult> resultMap){
-            super(taskUUID, user, dataList, data);
+        public Done(UUID taskUUID, User user, List<SyncData> dataList, StorageData data, Map<SyncData, EnumResult> resultMap, CommandSource source){
+            super(taskUUID, user, dataList, data, source);
             this.resultMap = resultMap;
             Sponge.getEventManager().post(this);
         }

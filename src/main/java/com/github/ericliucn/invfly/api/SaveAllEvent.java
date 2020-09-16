@@ -2,7 +2,7 @@ package com.github.ericliucn.invfly.api;
 
 import com.github.ericliucn.invfly.data.EnumResult;
 import com.github.ericliucn.invfly.data.StorageData;
-import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.user.TargetUserEvent;
 
 import java.util.List;
@@ -16,6 +16,8 @@ public interface SaveAllEvent extends TargetUserEvent {
     StorageData getStorageData();
 
     List<SyncData> getSyncDataList();
+
+    CommandSource getCmdSource();
 
     interface Pre extends SaveAllEvent{
 

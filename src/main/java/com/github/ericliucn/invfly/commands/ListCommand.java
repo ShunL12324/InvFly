@@ -106,7 +106,7 @@ public class ListCommand implements CommandExecutor {
 
     private void load(StorageData data, User user, CommandSource source){
         asyncExecutor.submit(()->{
-            service.loadUserData(user, data, false);
+            service.loadUserData(user, data, false, source);
         });
     }
 
@@ -114,27 +114,27 @@ public class ListCommand implements CommandExecutor {
         List<Text> texts = new ArrayList<>();
         Text id = message.getMessage("gui.id")
                 .toBuilder()
-                .append(Utils.toText(String.valueOf(data.getId())))
+                .append(Utils.toText("&b " + data.getId()))
                 .build();
         Text uuid = message.getMessage("gui.uuid")
                 .toBuilder()
-                .append(Utils.toText(data.getUuid()))
+                .append(Utils.toText("&b " + data.getUuid()))
                 .build();
         Text name = message.getMessage("gui.name")
                 .toBuilder()
-                .append(Utils.toText(data.getName()))
+                .append(Utils.toText("&b " + data.getName()))
                 .build();
         Text time = message.getMessage("gui.time")
                 .toBuilder()
-                .append(Utils.toText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(data.getTime())))
+                .append(Utils.toText("&b " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(data.getTime())))
                 .build();
         Text server = message.getMessage("gui.server")
                 .toBuilder()
-                .append(Utils.toText(data.getServerName()))
+                .append(Utils.toText("&b " + data.getServerName()))
                 .build();
         Text isDisconnect = message.getMessage("gui.disconnect")
                 .toBuilder()
-                .append(Utils.toText(String.valueOf(data.isDisconnect())))
+                .append(Utils.toText("&b " + data.isDisconnect()))
                 .build();
         Text recoverToUser = message.getMessage("gui.button.to.user")
                 .toBuilder()

@@ -52,12 +52,13 @@ public class Invfly {
     public void onPostInit(GamePostInitializationEvent event){
         instance = this;
         configLoader = new ConfigLoader(file);
-        databaseManager = new DatabaseManager();
         Sponge.getServiceManager().setProvider(this, SyncDataService.class, new SyncDataService());
     }
 
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
+        commandManager = new CommandManager();
+        databaseManager = new DatabaseManager();
         GSON = new Gson();
         asyncExecutor = Sponge.getScheduler().createAsyncExecutor(this);
         syncExecutor = Sponge.getScheduler().createSyncExecutor(this);
@@ -65,7 +66,6 @@ public class Invfly {
         service = Sponge.getServiceManager().provideUnchecked(SyncDataService.class);
         registerModule();
         eventHandler = new EventHandler();
-        commandManager = new CommandManager();
     }
 
     @Listener
