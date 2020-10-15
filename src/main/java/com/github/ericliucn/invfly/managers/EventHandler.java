@@ -1,7 +1,6 @@
 package com.github.ericliucn.invfly.managers;
 
 import com.github.ericliucn.invfly.Invfly;
-import com.github.ericliucn.invfly.api.LoadAllEvent;
 import com.github.ericliucn.invfly.config.InvFlyConfig;
 import com.github.ericliucn.invfly.config.Message;
 import com.github.ericliucn.invfly.data.StorageData;
@@ -13,11 +12,11 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.SaveWorldEvent;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -29,9 +28,16 @@ public class EventHandler {
     private SpongeExecutorService asyncExecutor;
     private Message message;
     private InvFlyConfig config;
+    private static final Map<UUID, Task> AUTO_SAVE_TASK = new HashMap<>();
+    private final Task AUTO_DEL_TASK;
 
     public EventHandler(){
         this.register();
+        this.AUTO_DEL_TASK = Task.builder()
+                .async()
+                .execute(()->databaseManager.deleteOutDate(config.general.outDate))
+                .interval(600, TimeUnit.SECONDS)
+                .submit(Invfly.instance);
     }
 
     public void register(){
@@ -45,6 +51,7 @@ public class EventHandler {
 
     public void unregister(){
         Sponge.getEventManager().unregisterListeners(this);
+        this.AUTO_DEL_TASK.cancel();
     }
 
 
@@ -57,6 +64,7 @@ public class EventHandler {
     @Listener
     public void onJoin(ClientConnectionEvent.Join event, @First Player player){
         if (player.hasPermission("invfly.sync.auto.load")){
+            // try sync when join
             asyncExecutor.schedule(()->{
                 StorageData storageData = databaseManager.getLatest(player);
                 if (storageData != null){
@@ -73,13 +81,33 @@ public class EventHandler {
                     }
                 }
             }, config.general.initialDelayWhenJoin, TimeUnit.MILLISECONDS);
+            // submit auto save task
+            if (config.general.autoSaveDelay > 0) {
+                Task.Builder taskBuilder = Task.builder()
+                        .delay(config.general.autoSaveDelay, TimeUnit.SECONDS)
+                        .async()
+                        .execute(() -> {
+                            if (player.isOnline()) {
+                                service.saveUserData(player, false, null);
+                            }
+                        })
+                        .interval(config.general.autoSaveInterval, TimeUnit.SECONDS);
+
+                AUTO_SAVE_TASK.put(player.getUniqueId(), taskBuilder.submit(Invfly.instance));
+            }
         }
     }
 
     @Listener
     public void disconnect(ClientConnectionEvent.Disconnect event, @First Player player){
         if (player.hasPermission("invfly.sync.auto.save")) {
+            // try to save data when quit game
             asyncExecutor.submit(() -> service.saveUserData(player, true, null));
+            // remove auto save task
+            if (AUTO_SAVE_TASK.containsKey(player.getUniqueId())){
+                AUTO_SAVE_TASK.get(player.getUniqueId()).cancel();
+                AUTO_SAVE_TASK.remove(player.getUniqueId());
+            }
         }
     }
 
@@ -102,7 +130,7 @@ public class EventHandler {
                 if (count < config.general.retryTimes){
                     player.sendMessage(message.getMessage("info.retry").replace("%second%", Text.of(config.general.nextRetryTime)));
                 }else if (count == config.general.retryTimes){
-                    if (!config.general.preventDirtyData){
+                    if (config.general.loadLatestWhenRetryFail){
                         player.sendMessage(message.getMessage("info.failed.trylatest"));
                         service.loadUserData(player, data, true, player);
                     }else {

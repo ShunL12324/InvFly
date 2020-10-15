@@ -106,22 +106,21 @@ public class InvFlyConfig {
                 "And if this value is greater than 0, Invfly will retry several times to wait for right data as you set")
         public int retryTimes = 5;
 
-        @Setting(comment = "Set this to true means if finally failed to load right data for player\n" +
-                "This player's data will not be save or load in current server to prevent dirty data\n" +
-                "And they are also not able to change any inventory\n" +
-                "You can still to use commands to save/load, but that may cause problems\n" +
-                "It that happen, you better let the player back to the previous server and check out what wrong\n" +
-                "Set this to false means it will load the latest data for the player after failed to find appropriate data")
-        public boolean preventDirtyData = false;
-
         @Setting(comment = "How long for next retry (seconds)")
         public int nextRetryTime = 1;
 
-        @Setting
-        public boolean saveWhenWorldSave = true;
+        @Setting(comment = "重试失败后是否加载能获取到的最新的数据")
+        public boolean loadLatestWhenRetryFail = true;
 
         @Setting
         public int loadTimeOut = 5;
+
+        @Setting(comment = "等待多少秒之后开始自动保存玩家数据定时任务，设置为 0 关闭")
+        public int autoSaveDelay = 15;
+
+        @Setting(comment = "每隔多少秒保存一次玩家数据， autoSaveDelay不为 0 时改设置有效")
+        public int autoSaveInterval = 30;
+
 
     }
 

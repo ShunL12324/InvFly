@@ -9,13 +9,16 @@ import com.github.ericliucn.invfly.event.SaveAllEventImpl;
 import com.github.ericliucn.invfly.utils.Utils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.io.IOUtils;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.User;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,7 +76,7 @@ public class DatabaseManager {
                 "(id int not null auto_increment, " +
                 "uuid varchar(40) not null, " +
                 "name text, " +
-                "data longtext, " +
+                "data longblob, " +
                 "time timestamp(5) default current_timestamp(5), " +
                 "disconnect boolean default 0," +
                 "server text," +
@@ -91,12 +94,13 @@ public class DatabaseManager {
     }
 
     public void saveData(StorageData data, User user, UUID taskUUID, List<SyncData> dataList, Map<SyncData, EnumResult> resultMap, CommandSource source){
-        String sql = String.format("insert into %s (uuid, name, data, disconnect, server) values('%s', '%s', '%s', %b, '%s')",
-                table, data.getUuid(), data.getName(), StringEscapeUtils.escapeJava(data.getData()), data.isDisconnect(), data.getServerName());
+        String sql = String.format("insert into %s (uuid, name, data, disconnect, server) values('%s', '%s', ?, %b, '%s')",
+                table, data.getUuid(), data.getName(), data.isDisconnect(), data.getServerName());
         try (
                 Connection connection = getDataSource().getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ){
+            statement.setBinaryStream(1, toInputStream(data.getData()));
             statement.execute();
             Utils.postEvent(new SaveAllEventImpl.Done(user, taskUUID, dataList, data, resultMap, source));
         }catch (SQLException e){
@@ -119,13 +123,13 @@ public class DatabaseManager {
                         resultSet.getInt("id"),
                         resultSet.getString("uuid"),
                         resultSet.getString("name"),
-                        resultSet.getString("data"),
+                        getStringFromStream(resultSet.getBinaryStream("data")),
                         resultSet.getTimestamp("time"),
                         resultSet.getBoolean("disconnect"),
                         resultSet.getString("server")
                 );
             }
-        }catch (SQLException e){
+        }catch (SQLException | IOException e){
             e.printStackTrace();
         }
         return null;
@@ -147,13 +151,13 @@ public class DatabaseManager {
                         resultSet.getInt("id"),
                         resultSet.getString("uuid"),
                         resultSet.getString("name"),
-                        resultSet.getString("data"),
+                        getStringFromStream(resultSet.getBinaryStream("data")),
                         resultSet.getTimestamp("time"),
                         resultSet.getBoolean("disconnect"),
                         resultSet.getString("server")
                 ));
             }
-        }catch (SQLException e){
+        }catch (SQLException | IOException e){
             e.printStackTrace();
         }
         return dataList;
@@ -215,6 +219,14 @@ public class DatabaseManager {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private static InputStream toInputStream(String data){
+        return IOUtils.toInputStream(data, StandardCharsets.UTF_8);
+    }
+
+    private static String getStringFromStream(InputStream stream) throws IOException {
+        return IOUtils.toString(stream, StandardCharsets.UTF_8);
     }
 
 }

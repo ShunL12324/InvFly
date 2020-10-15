@@ -16,6 +16,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
@@ -40,7 +41,6 @@ public class Invfly {
     public static Invfly instance;
     private ConfigLoader configLoader;
     private DatabaseManager databaseManager;
-    private CommandManager commandManager;
     private SyncDataService service;
     private EventHandler eventHandler;
     private SpongeExecutorService asyncExecutor;
@@ -57,7 +57,7 @@ public class Invfly {
 
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
-        commandManager = new CommandManager();
+        new CommandManager();
         databaseManager = new DatabaseManager();
         GSON = new Gson();
         asyncExecutor = Sponge.getScheduler().createAsyncExecutor(this);
@@ -66,6 +66,13 @@ public class Invfly {
         service = Sponge.getServiceManager().provideUnchecked(SyncDataService.class);
         registerModule();
         eventHandler = new EventHandler();
+    }
+
+    @Listener
+    public void onServerStop(GameStoppingEvent event){
+        Sponge.getServer().getOnlinePlayers().forEach(player -> {
+            service.saveUserData(player, true, Sponge.getServer().getConsole());
+        });
     }
 
     @Listener
